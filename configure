@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "Installing dependencies ..."
+go get "github.com/orfjackal/gospec/src/gospec"
+

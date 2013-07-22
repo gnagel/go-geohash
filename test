@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Testing Go-GeoHash ..."
+
+# Cleanup and format the code
+# This will break on any syntax errors
+go fmt
+
+# Run the tests
+# This will run the "all_spec_test.go" suite of tests
+go test 
