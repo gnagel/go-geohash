@@ -2,6 +2,9 @@
 
 echo "Testing Go-GeoHash ..."
 
+# Make sure the dependencies are setup
+./configure
+
 # Cleanup and format the code
 # This will break on any syntax errors
 go fmt
