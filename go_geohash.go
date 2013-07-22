@@ -3,12 +3,20 @@ package go_geohash
 import "strings"
 
 // Default precision to use
-const default_precision = 9
+const default_precision uint8 = 9
 
 // Static array of 0-9, a-z
-const base32_codes = [...]string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "b", "c", "d", "e", "f", "g", "h", "j", "k", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
+var base32_codes [32]string
+var base32_map map[string]uint8
 
-const base32_map = map[string]int{"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "b": 10, "c": 11, "d": 12, "e": 13, "f": 14, "g": 15, "h": 16, "j": 17, "k": 18, "m": 19, "n": 20, "p": 21, "q": 22, "r": 23, "s": 24, "t": 25, "u": 26, "v": 27, "w": 28, "x": 29, "y": 30, "z": 31}
+func init() {
+	base32_codes = [...]string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "b", "c", "d", "e", "f", "g", "h", "j", "k", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
+
+	base32_map = map[string]uint8{}
+	for i, c := range base32_codes {
+		base32_map[c] = uint8(i)
+	}
+}
 
 //
 // Bounded box for parsing latitude and longitude
@@ -42,7 +50,7 @@ type DecodedPosition struct {
 //
 func Encode(latitude float64, longitude float64, precision uint8) string {
 	// Pre-Allocate the hash string
-	var output string = strings.Repeat(' ', precision)
+	// var output string = strings.Repeat(" ", int(precision))
 
 	// DecodedBoundBox for the lat/lon + errors
 	var bbox DecodedBoundBox = DecodedBoundBox{MaxLatitude: 90, MaxLongitude: 180, MinLatitude: -90, MinLongitude: -180}
@@ -52,6 +60,7 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 	var num_bits uint = 0
 	var hash_index int = 0
 
+	var buffer = make([]string, precision)
 	var output_length uint8 = 0
 	for output_length < precision {
 		if islon {
@@ -77,13 +86,16 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 
 		num_bits++
 		if 5 == num_bits {
-			output[output_length] = base32_codes[hash_index]
+			buffer[output_length] = base32_codes[hash_index]
+			// output[output_length] = base32_codes[hash_index]
 
 			output_length++
 			num_bits = 0
 			hash_index = 0
 		}
 	}
+
+	var output = strings.Join(buffer, "")
 
 	return output
 }
@@ -95,11 +107,11 @@ func DecodeBoundBox(hash_string string) DecodedBoundBox {
 	var output DecodedBoundBox = DecodedBoundBox{MaxLatitude: 90, MaxLongitude: 180, MinLatitude: -90, MinLongitude: -180}
 
 	var islon bool = true
-	for i := 0; i < len(hash_string); i++ {
-		var char_index = base32_map[hash_string[i]]
+	for _, c := range hash_string {
+		var index_of uint8 = base32_map[string(c)]
 
 		for bits := 4; bits >= 0; bits-- {
-			bit := (char_index >> bits) & 1
+			bit := (index_of >> uint8(bits)) & 1
 			if islon {
 				mid := (output.MaxLongitude + output.MinLongitude) / 2
 				if bit == 1 {
@@ -123,7 +135,7 @@ func DecodeBoundBox(hash_string string) DecodedBoundBox {
 }
 
 func Decode(hash_string string) DecodedPosition {
-	var bbox DecodeBoundBox = DecodeBoundBox(hash_string)
+	var bbox DecodedBoundBox = DecodeBoundBox(hash_string)
 	var output DecodedPosition
 	// Mid point of box
 	output.Latitude = (bbox.MinLatitude + bbox.MaxLatitude) / 2
@@ -138,8 +150,9 @@ func Decode(hash_string string) DecodedPosition {
 func Neighbor(hash_string string, direction [2]int) string {
 	// Adjust the DecodedPosition for the direction of the neighbors
 	var position DecodedPosition = Decode(hash_string)
-	position.Latitude += direction[0] * position.LatitudeError * 2
-	position.Longitude += direction[1] * position.LongitudeError * 2
+	precision := uint8(len(hash_string))
+	lat := position.Latitude + float64(direction[0])*position.LatitudeError*2
+	lon := position.Longitude + float64(direction[1])*position.LongitudeError*2
 
-	return Encode(position.latitude, position.longitude, hash_string.length())
+	return Encode(lat, lon, precision)
 }
