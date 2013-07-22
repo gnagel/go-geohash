@@ -2,15 +2,12 @@ package go_geohash
 
 import "strings"
 
-// Default precision to use
-const default_precision uint8 = 9
-
 // Static array of 0-9, a-z
-const base32_codes [32]string
+var base32_codes [32]string
 
-// Static map of character in "base32_codes" to it's position 
+// Static map of character in "base32_codes" to it's position
 // This is to improve performance of the DecodeBoundBox method
-const base32_map map[string]uint8
+var base32_map map[string]uint8
 
 func init() {
 	base32_codes = [...]string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "b", "c", "d", "e", "f", "g", "h", "j", "k", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
