@@ -1,5 +1,7 @@
 #!/bin/sh
 
+GOPATH=$PWD/
+
 echo "Testing Go-GeoHash ..."
 
 # Make sure the dependencies are setup
