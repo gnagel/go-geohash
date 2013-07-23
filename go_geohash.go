@@ -1,6 +1,7 @@
 package go_geohash
 
 import "strings"
+import "bytes"
 
 // Static array of 0-9, a-z
 var base32_codes [32]string
@@ -60,7 +61,7 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 	var num_bits uint = 0
 	var hash_index int = 0
 
-	var buffer = make([]string, precision)
+	var buffer bytes.Buffer
 	var output_length uint8 = 0
 	for output_length < precision {
 		if islon {
@@ -86,8 +87,7 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 
 		num_bits++
 		if 5 == num_bits {
-			buffer[output_length] = base32_codes[hash_index]
-			// output[output_length] = base32_codes[hash_index]
+			buffer.WriteString(base32_codes[hash_index])
 
 			output_length++
 			num_bits = 0
@@ -95,9 +95,7 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 		}
 	}
 
-	var output = strings.Join(buffer, "")
-
-	return output
+	return buffer.String()
 }
 
 func DecodeBoundBox(hash_string string) DecodedBoundBox {
