@@ -1,0 +1,20 @@
+#!/bin/sh
+
+export GOPATH=$PWD/
+
+echo "......................"
+echo "Building Server ......"
+echo "......................"
+echo ""
+
+# Make sure the dependencies are setup
+# Import the script into this namespace
+. ./configure
+
+# Cleanup and format the code
+# This will break on any syntax errors
+go fmt ./*/*.go
+go fmt
+
+# Build the app
+# go build ggeohash_cli.go

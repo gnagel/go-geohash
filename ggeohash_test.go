@@ -1,21 +1,26 @@
-package go_geohash
+package ggeohash
 
+import "os"
 import "math"
+
+// import "io/ioutil"
+import "encoding/csv"
+import "strconv"
 
 import (
 	"github.com/orfjackal/gospec/src/gospec"
 	. "github.com/orfjackal/gospec/src/gospec"
 )
 
-var longitude = 112.5584
-var latitude = 37.8324
-var geostr = "ww8p1r4t8"
-
 // Helpers
 func GeoHashSpec(c gospec.Context) {
+	var longitude = 112.5584
+	var latitude = 37.8324
+	var precision = uint8(9)
+	var geostr = "ww8p1r4t8"
 
 	c.Specify("encodes latitude & longitude as string", func() {
-		var actual = Encode(latitude, longitude, 9)
+		var actual = Encode(latitude, longitude, precision)
 		var expected = geostr
 		c.Expect(actual, Equals, expected)
 	})
@@ -56,4 +61,35 @@ func GeoHashSpec(c gospec.Context) {
 		c.Expect(actual, Equals, expected)
 	})
 
+	c.Specify("CSV of encoded latitude, longitude, and precision matches encode", func() {
+		file, err := os.Open("./encode_the_world.csv") // ioutil.ReadFile("./encode_the_world.csv")
+		if nil != err {
+			panic(err)
+		}
+		defer file.Close()
+
+		reader := csv.NewReader(file)
+		lines, err := reader.ReadAll()
+		if nil != err {
+			panic(err)
+		}
+
+		for index, line := range lines {
+			if index == 0 {
+				continue
+			}
+			i := 0
+			latitude, _ := strconv.ParseFloat(line[i], 64)
+			i++
+			longitude, _ := strconv.ParseFloat(line[i], 64)
+			i++
+			precision, _ := strconv.Atoi(line[i])
+			i++
+			expected := line[i]
+			i++
+
+			var actual = Encode(latitude, longitude, uint8(precision))
+			c.Expect(actual, Equals, expected)
+		}
+	})
 }

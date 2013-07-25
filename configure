@@ -1,8 +1,7 @@
 #!/bin/sh
 
-GOPATH=$PWD/
+export GOPATH=$PWD/
 
 echo "Installing dependencies ..."
 
 go get "github.com/orfjackal/gospec/src/gospec"
-

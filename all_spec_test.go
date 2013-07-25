@@ -2,7 +2,7 @@
 // Unit Test Suite
 //
 
-package go_geohash
+package ggeohash
 
 import (
 	"github.com/orfjackal/gospec/src/gospec"

@@ -1,4 +1,4 @@
-package go_geohash
+package ggeohash
 
 import "strings"
 import "bytes"
@@ -98,11 +98,11 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 	return buffer.String()
 }
 
-func DecodeBoundBox(hash_string string) DecodedBoundBox {
+func DecodeBoundBox(hash_string string) *DecodedBoundBox {
 	// Downcase the input string
 	hash_string = strings.ToLower(hash_string)
 
-	var output DecodedBoundBox = DecodedBoundBox{MaxLatitude: 90, MaxLongitude: 180, MinLatitude: -90, MinLongitude: -180}
+	output := &DecodedBoundBox{MaxLatitude: 90, MaxLongitude: 180, MinLatitude: -90, MinLongitude: -180}
 
 	var islon bool = true
 	for _, c := range hash_string {
@@ -132,9 +132,9 @@ func DecodeBoundBox(hash_string string) DecodedBoundBox {
 	return output
 }
 
-func Decode(hash_string string) DecodedPosition {
-	var bbox DecodedBoundBox = DecodeBoundBox(hash_string)
-	var output DecodedPosition
+func Decode(hash_string string) *DecodedPosition {
+	bbox := DecodeBoundBox(hash_string)
+	output := &DecodedPosition{}
 	// Mid point of box
 	output.Latitude = (bbox.MinLatitude + bbox.MaxLatitude) / 2
 	output.Longitude = (bbox.MinLongitude + bbox.MaxLongitude) / 2
@@ -147,7 +147,7 @@ func Decode(hash_string string) DecodedPosition {
 
 func Neighbor(hash_string string, direction [2]int) string {
 	// Adjust the DecodedPosition for the direction of the neighbors
-	var position DecodedPosition = Decode(hash_string)
+	position := Decode(hash_string)
 	precision := uint8(len(hash_string))
 	lat := position.Latitude + float64(direction[0])*position.LatitudeError*2
 	lon := position.Longitude + float64(direction[1])*position.LongitudeError*2

@@ -1,16 +1,37 @@
 #!/bin/sh
 
-GOPATH=$PWD/
+export GOPATH=$PWD/
 
+echo "......................"
 echo "Testing Go-GeoHash ..."
+echo "......................"
+echo ""
 
 # Make sure the dependencies are setup
-./configure
+# Import the script into this namespace
+. ./configure
 
-# Cleanup and format the code
-# This will break on any syntax errors
-go fmt
+# Make sure the app builds
+. ./build
 
 # Run the tests
 # This will run the "all_spec_test.go" suite of tests
-go test 
+echo "......................"
+echo "Running tests ........"
+echo ""
+echo "and .................."
+echo ""
+echo "Benchmarks ..........."
+echo ""
+echo "Please be patient while benchmarks run ..."
+echo "5s/test * 14 tests --> A VERY LONG time ..."
+echo ""
+echo "......................"
+echo ""
+
+export GOMAXPROCS=1
+go test -benchtime 5s -bench ".*" | tee test.log
+
+echo '' >> test_benchmark.log
+date >> test_benchmark.log
+grep 'ns/op' test.log >> test_benchmark.log
