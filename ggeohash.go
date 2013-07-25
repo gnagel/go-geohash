@@ -4,18 +4,17 @@ import "strings"
 import "bytes"
 
 // Static array of 0-9, a-z
-var base32_codes [32]string
-
-// Static map of character in "base32_codes" to it's position
-// This is to improve performance of the DecodeBoundBox method
-var base32_map map[string]uint8
+var base32_codes [32]byte = [32]byte{}
+var base32_map map[byte]uint8 = map[byte]uint8{}
 
 func init() {
-	base32_codes = [...]string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "b", "c", "d", "e", "f", "g", "h", "j", "k", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
-
-	base32_map = map[string]uint8{}
-	for i, c := range base32_codes {
-		base32_map[c] = uint8(i)
+	characters := "0123456789bcdefghjkmnpqrstuvwxyz"
+	
+	// Map the runes to bytes & index positions
+	for index, rune := range characters {
+		byte_at := byte(rune)
+		base32_codes[index] = byte_at
+		base32_map[byte_at] = uint8(index)
 	}
 }
 
@@ -87,7 +86,7 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 
 		num_bits++
 		if 5 == num_bits {
-			buffer.WriteString(base32_codes[hash_index])
+			buffer.WriteByte(base32_codes[hash_index])
 
 			output_length++
 			num_bits = 0
@@ -98,6 +97,12 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 	return buffer.String()
 }
 
+// Clone the Map instance
+// This prevents multiple threads from accessing the same map instance con-currently
+func base32_map_factory() map[byte]uint8 {
+	return base32_map
+}
+
 func DecodeBoundBox(hash_string string) *DecodedBoundBox {
 	// Downcase the input string
 	hash_string = strings.ToLower(hash_string)
@@ -105,8 +110,14 @@ func DecodeBoundBox(hash_string string) *DecodedBoundBox {
 	output := &DecodedBoundBox{MaxLatitude: 90, MaxLongitude: 180, MinLatitude: -90, MinLongitude: -180}
 
 	var islon bool = true
+
+	// We can't do this as a static map in GO
+	// Since the MAP type is not thread safe
+	lookup := base32_map_factory()
+
 	for _, c := range hash_string {
-		var index_of uint8 = base32_map[string(c)]
+		byte_at := (byte(c))
+		var index_of uint8 = lookup[byte_at]
 
 		for bits := 4; bits >= 0; bits-- {
 			bit := (index_of >> uint8(bits)) & 1

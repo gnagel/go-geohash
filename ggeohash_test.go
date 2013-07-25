@@ -62,7 +62,7 @@ func GeoHashSpec(c gospec.Context) {
 	})
 
 	c.Specify("CSV of encoded latitude, longitude, and precision matches encode", func() {
-		file, err := os.Open("./encode_the_world.csv") // ioutil.ReadFile("./encode_the_world.csv")
+		file, err := os.Open("./encode_the_world.csv")
 		if nil != err {
 			panic(err)
 		}
