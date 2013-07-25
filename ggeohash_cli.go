@@ -35,8 +35,8 @@ func main() {
 	args, err := flags.Parse(&opts)
 
 	if err != nil {
-		panic(err)
-		os.Exit(1)
+		os.Exit(0)
+		return
 	}
 
 	fmt.Printf("Verbosity: %v\n", opts.Verbose)
