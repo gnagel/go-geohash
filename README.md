@@ -1,8 +1,11 @@
 go-geohash
 ==========
 
-GO implementation of GeoHashing Latitude &amp; Longitude (node.js version here: https://github.com/gnagel/node-geohash-cpp)
+GO implementation of GeoHashing Latitude &amp; Longitude
 
+[Node.js C++ Implementation](https://github.com/gnagel/node-geohash-cpp)
+[Node.js Original](https://github.com/sunng87/node-geohash)
+[GO Encode/Decode Only](https://github.com/broady/gogeohash)
 
 [Accuracy](http://en.wikipedia.org/wiki/Decimal_degrees): 
 =========

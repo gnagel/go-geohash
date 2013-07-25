@@ -9,7 +9,7 @@ var base32_map map[byte]uint8 = map[byte]uint8{}
 
 func init() {
 	characters := "0123456789bcdefghjkmnpqrstuvwxyz"
-	
+
 	// Map the runes to bytes & index positions
 	for index, rune := range characters {
 		byte_at := byte(rune)

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export GOPATH=$PWD/
+
+./build && ./ggeohash_cli $@
