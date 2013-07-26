@@ -14,6 +14,30 @@ import (
 
 // Helpers
 func GeoHashSpec(c gospec.Context) {
+	//
+	// Verify the conversion methods return the correct input/output
+	//
+	c.Specify("Converts ints to bytes and back again", func() {
+		// This is important to get right ...
+		// The GeoHash algorithm depends on this being fast and consistent
+		src := "0123456789bcdefghjkmnpqrstuvwxyz"
+		for i := 0; i < 32; i++ {
+			// What is the character at "i"
+			src_at := byte(src[i])
+
+			// Map the position to the byte
+			byte_at := ConvertIndexToByte(i)
+			c.Expect(byte_at, Equals, src_at)
+
+			// Map the byte back to the position
+			index_at := ConvertByteToIndex(byte_at)
+			c.Expect(index_at, Equals, i)
+		}
+	})
+
+	//
+	// Verify the GeoHash methods encode/decode the input correctly
+	//
 	var longitude = 112.5584
 	var latitude = 37.8324
 	var precision = uint8(9)
@@ -61,6 +85,18 @@ func GeoHashSpec(c gospec.Context) {
 		c.Expect(actual, Equals, expected)
 	})
 
+	//
+	// Batch-test the GeoHash Encode against the Node.js's output.
+	//
+	// It is critical this is correct and consistent across platforms.
+	//
+	// There are multiple imlementations of this in several languages:
+	// - GO
+	// - Node.JS
+	// - Ruby
+	// - C++
+	// - etc
+	//
 	c.Specify("CSV of encoded latitude, longitude, and precision matches encode", func() {
 		file, err := os.Open("./encode_the_world.csv")
 		if nil != err {

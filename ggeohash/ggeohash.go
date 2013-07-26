@@ -2,20 +2,37 @@ package ggeohash
 
 import "strings"
 import "bytes"
+import "fmt"
 
 // Static array of 0-9, a-z
 var base32_codes [32]byte = [32]byte{}
-var base32_map map[byte]uint8 = map[byte]uint8{}
 
 func init() {
 	characters := "0123456789bcdefghjkmnpqrstuvwxyz"
 
-	// Map the runes to bytes & index positions
+	// Map the bytes to bytes & index positions
 	for index, rune := range characters {
 		byte_at := byte(rune)
 		base32_codes[index] = byte_at
-		base32_map[byte_at] = uint8(index)
 	}
+}
+
+//
+// Convert the given index to it's byte
+// Assumes i is within [0, 32)
+//
+func ConvertIndexToByte(i int) byte {
+	return base32_codes[i]
+}
+
+//
+// Convert the given byte to an int index
+// == -1 --> Failure!
+// >= 0  --> Success!
+//
+func ConvertByteToIndex(b byte) int {
+	// NOTE: This should be thread save
+	return bytes.IndexByte(base32_codes[:], b)
 }
 
 //
@@ -86,7 +103,7 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 
 		num_bits++
 		if 5 == num_bits {
-			buffer.WriteByte(base32_codes[hash_index])
+			buffer.WriteByte(ConvertIndexToByte(hash_index))
 
 			output_length++
 			num_bits = 0
@@ -97,12 +114,6 @@ func Encode(latitude float64, longitude float64, precision uint8) string {
 	return buffer.String()
 }
 
-// Clone the Map instance
-// This prevents multiple threads from accessing the same map instance con-currently
-func base32_map_factory() map[byte]uint8 {
-	return base32_map
-}
-
 func DecodeBoundBox(hash_string string) *DecodedBoundBox {
 	// Downcase the input string
 	hash_string = strings.ToLower(hash_string)
@@ -111,14 +122,15 @@ func DecodeBoundBox(hash_string string) *DecodedBoundBox {
 
 	var islon bool = true
 
-	// We can't do this as a static map in GO
-	// Since the MAP type is not thread safe
-	lookup := base32_map_factory()
+	for i, c := range hash_string {
+		byte_at := byte(c)
+		index_at := ConvertByteToIndex(byte_at)
+		if index_at < 0 {
+			msg := fmt.Sprintf("[DecodeBoundBox]  Unknown byte at index=%d, rune='%v' in string='%v'", i, c, hash_string)
+			panic(msg)
+		}
 
-	for _, c := range hash_string {
-		byte_at := (byte(c))
-		var index_of uint8 = lookup[byte_at]
-
+		index_of := uint8(index_at)
 		for bits := 4; bits >= 0; bits-- {
 			bit := (index_of >> uint8(bits)) & 1
 			if islon {
