@@ -13,12 +13,21 @@ echo "......................"
 echo "Formatting the code .."
 echo "......................"
 echo ""
-go fmt . ./ggeohash
+gofmt -s -w .
 
 # Build the app
 
 echo "......................"
-echo "Building Server ......"
+echo "Building GGeoHash CLI."
 echo "......................"
 echo ""
-go build ggeohash_cli.go
+rm -f ./bin/*
+go build ./ggeohash_cli/cli.go && mv ./cli ./bin/ggeohash_cli
+chmod -R 777 ./bin
+
+
+echo "......................"
+echo "Built Command Line Interface for GGeoHash"
+echo "......................"
+echo ""
+ls ./bin/*
