@@ -3,7 +3,7 @@ package main
 import "fmt"
 import "os"
 import "strings"
-import "./ggeohash"
+import "github.com/gnagel/go-geohash/ggeohash"
 
 import flags "github.com/jessevdk/go-flags"
 

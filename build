@@ -22,7 +22,7 @@ echo "Building GGeoHash CLI."
 echo "......................"
 echo ""
 rm -f ./bin/*
-go build ./ggeohash_cli/cli.go && mv ./cli ./bin/ggeohash_cli
+go build ./ggeohash/ggeohash_cli/cli.go && mv ./cli ./bin/ggeohash_cli
 chmod -R 777 ./bin
 
 
